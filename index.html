@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Medical Advice Panel - Kaiser Records Analysis</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+    <!-- Header with Disclaimers -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">Medical Insights Panel</h1>
+            <div class="disclaimer-banner">
+                <strong>Important:</strong> This tool provides educational insights only. Always consult healthcare professionals for medical decisions.
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Application -->
+    <main class="main-content">
+        <!-- Upload Section -->
+        <section id="upload-section" class="upload-section">
+            <div class="container">
+                <div class="upload-card">
+                    <h2>Upload Kaiser Medical Records</h2>
+                    <p>Upload your PDF medical records for personalized health insights</p>
+                    <div class="upload-area" id="upload-area">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 15V3m0 0l-4 4m4-4l4 4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"/>
+                        </svg>
+                        <p>Drag and drop your PDF files here or click to browse</p>
+                        <input type="file" id="file-input" accept=".pdf" multiple hidden>
+                        <button class="btn-primary" id="browse-btn">Browse Files</button>
+                    </div>
+                    <div id="file-list" class="file-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section (Hidden Initially) -->
+        <section id="dashboard-section" class="dashboard-section" style="display: none;">
+            <div class="container">
+                <!-- Quick Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blood-pressure"></div>
+                        <div class="stat-content">
+                            <h3>Blood Pressure</h3>
+                            <p class="stat-value" id="bp-value">--/--</p>
+                            <p class="stat-label">mmHg</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon cholesterol"></div>
+                        <div class="stat-content">
+                            <h3>Cholesterol</h3>
+                            <p class="stat-value" id="cholesterol-value">--</p>
+                            <p class="stat-label">mg/dL</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon glucose"></div>
+                        <div class="stat-content">
+                            <h3>Blood Sugar</h3>
+                            <p class="stat-value" id="glucose-value">--</p>
+                            <p class="stat-label">mg/dL</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bmi"></div>
+                        <div class="stat-content">
+                            <h3>BMI</h3>
+                            <p class="stat-value" id="bmi-value">--</p>
+                            <p class="stat-label">kg/m²</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="overview">Overview</button>
+                    <button class="tab-btn" data-tab="trends">Trends</button>
+                    <button class="tab-btn" data-tab="medications">Medications</button>
+                    <button class="tab-btn" data-tab="insights">AI Insights</button>
+                    <button class="tab-btn" data-tab="recommendations">Recommendations</button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="tab-content">
+                    <!-- Overview Tab -->
+                    <div id="overview-tab" class="tab-panel active">
+                        <div class="overview-grid">
+                            <div class="health-summary card">
+                                <h3>Health Summary</h3>
+                                <div id="health-summary-content">
+                                    <p>Loading health data...</p>
+                                </div>
+                            </div>
+                            <div class="recent-tests card">
+                                <h3>Recent Lab Results</h3>
+                                <div id="recent-tests-content">
+                                    <p>Loading test results...</p>
+                                </div>
+                            </div>
+                            <div class="risk-factors card">
+                                <h3>Risk Assessment</h3>
+                                <div id="risk-assessment-content">
+                                    <p>Analyzing risk factors...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trends Tab -->
+                    <div id="trends-tab" class="tab-panel">
+                        <div class="trends-grid">
+                            <div class="chart-card">
+                                <h3>Blood Pressure Trends</h3>
+                                <canvas id="bp-chart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Weight & BMI Trends</h3>
+                                <canvas id="weight-chart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Lab Results Timeline</h3>
+                                <canvas id="labs-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Medications Tab -->
+                    <div id="medications-tab" class="tab-panel">
+                        <div class="medications-grid">
+                            <div class="current-meds card">
+                                <h3>Current Medications</h3>
+                                <div id="current-meds-list"></div>
+                            </div>
+                            <div class="interactions card">
+                                <h3>Potential Interactions</h3>
+                                <div id="interactions-content"></div>
+                            </div>
+                            <div class="adherence card">
+                                <h3>Medication Adherence</h3>
+                                <div id="adherence-content"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Insights Tab -->
+                    <div id="insights-tab" class="tab-panel">
+                        <div class="insights-container">
+                            <div class="ai-analysis card">
+                                <h3>AI-Powered Health Analysis</h3>
+                                <div id="ai-insights-content">
+                                    <div class="insight-item">
+                                        <h4>Pattern Recognition</h4>
+                                        <p>Analyzing your health data patterns...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="predictive-risks card">
+                                <h3>Predictive Risk Analysis</h3>
+                                <div id="predictive-content"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations Tab -->
+                    <div id="recommendations-tab" class="tab-panel">
+                        <div class="recommendations-grid">
+                            <div class="lifestyle card">
+                                <h3>Lifestyle Recommendations</h3>
+                                <div id="lifestyle-recs"></div>
+                            </div>
+                            <div class="preventive card">
+                                <h3>Preventive Care Reminders</h3>
+                                <div id="preventive-care"></div>
+                            </div>
+                            <div class="goals card">
+                                <h3>Health Goals</h3>
+                                <div id="health-goals"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer with Privacy Notice -->
+    <footer class="footer">
+        <div class="container">
+            <div class="privacy-notice">
+                <p><strong>Privacy Notice:</strong> All data is processed locally in your browser. No medical information is sent to external servers.</p>
+                <p>© 2024 Personal Medical Advice Panel | For Educational Purposes Only</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>Analyzing medical records...</p>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
